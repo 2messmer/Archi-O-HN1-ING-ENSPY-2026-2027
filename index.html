@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ASM·ENSPY — Pseudo-assembleur</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f2f5f1;--ink:#14213d;--mut:#5b6678;--card:#fff;--line:#d5dcd3;--liq:#1f7a8c;--err:#c8372d;--warn:#b7791f;--cur:#fde9a8;--ok:#2f8f5b}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 'Bricolage Grotesque',system-ui,sans-serif;color:var(--ink);background:var(--bg) linear-gradient(rgba(20,33,61,.05) 1px,transparent 1px) 0 0/100% 28px}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px 18px;background:var(--ink);color:#fff}
+header h1{margin:0;font-size:20px;letter-spacing:.2px}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:1px solid var(--ink);background:#fff;border-radius:8px;padding:6px 12px}
+button:hover{background:#eaf2f0}button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #f2a900;outline-offset:1px}
+header button{background:transparent;color:#fff;border-color:#ffffff66}
+header button.on{background:#fff;color:var(--ink)}
+button.pri{background:var(--liq);color:#fff;border-color:var(--liq);font-weight:600}
+main{max-width:1180px;margin:0 auto;padding:16px}
+.hide{display:none!important}
+.grid{display:grid;grid-template-columns:1.1fr 1fr;gap:16px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:16px}
+.card h2{margin:0 0 8px;font-size:16px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+textarea,input,select{border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:#fff}
+textarea{width:100%;min-height:250px;font:14px/1.6 'JetBrains Mono',monospace;resize:vertical;tab-size:4}
+.code{font:14px/1.6 'JetBrains Mono',monospace;border:1px solid var(--line);border-radius:8px;background:#fcfdfc;cursor:text;max-height:420px;overflow:auto}
+.ln{display:flex;border-left:4px solid transparent;white-space:pre}
+.ln b{width:36px;flex:none;text-align:right;padding-right:8px;color:var(--mut);font-weight:400;user-select:none}
+.ln.cur{background:var(--cur);border-left-color:#f2a900}
+.ln.err{background:#fde7e4;border-left-color:var(--err)}.ln.wrn{background:#fff6dd;border-left-color:var(--warn)}
+.note{font:13px/1.4 'Bricolage Grotesque',sans-serif;padding:3px 10px 5px 40px;white-space:normal}
+.note.e{background:#fde7e4;color:var(--err)}.note.w{background:#fff6dd;color:var(--warn)}
+.tanks{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.tank{text-align:center;font:600 14px 'JetBrains Mono',monospace}
+.cup{position:relative;width:76px;height:98px;border:3px solid var(--ink);border-top:0;border-radius:0 0 12px 12px;overflow:hidden;background:#fff;margin-top:4px}
+.cup i{position:absolute;left:0;right:0;bottom:0;background:var(--liq);opacity:.8;transition:height .5s}
+.cup.neg i{background:#8e4a7a}
+.cup span{position:absolute;inset:0;display:grid;place-items:center;font-size:18px}
+.cup span u{text-decoration:none;background:#ffffffd9;padding:0 6px;border-radius:6px}
+.ch .cup{animation:pop .6s}@keyframes pop{40%{transform:scale(1.1)}}
+@media(prefers-reduced-motion:reduce){.ch .cup{animation:none}.cup i{transition:none}}
+.stack{display:flex;flex-direction:column;width:96px;min-height:130px;justify-content:flex-end;border:3px solid var(--ink);border-top:0;border-radius:0 0 12px 12px;padding:4px;gap:3px;background:#fff}
+.cell{position:relative;background:var(--liq);color:#fff;border-radius:6px;padding:4px 8px;font:600 15px 'JetBrains Mono',monospace;text-align:center}
+.cell em{position:absolute;left:-30px;top:5px;font:600 12px 'JetBrains Mono',monospace;color:var(--ink);font-style:normal}
+.stwrap{margin-left:30px}
+.out{font:600 15px 'JetBrains Mono',monospace;background:var(--ink);color:#cfe;border-radius:8px;padding:8px 12px;min-height:40px;white-space:pre-wrap}
+table{border-collapse:collapse;width:100%}th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
+.ex{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px}
+.ok{color:var(--ok);font-weight:600}.bad{color:var(--err);font-weight:600}.mut{color:var(--mut)}
+.badge{display:inline-block;padding:1px 8px;border-radius:99px;background:#e3efec;margin-right:4px;font-size:13px}
+.me{background:#fff6dd}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;max-width:90vw}
+</style></head><body>
+<header>
+ <h1>ASM·ENSPY <span class="mut" style="color:#9fb">HN_ING1</span></h1>
+ <nav>
+  <button data-tab="ed" class="on"><span data-f="Éditeur" data-e="Editor"></span></button>
+  <button data-tab="ex"><span data-f="Exercices" data-e="Exercises"></span></button>
+  <button data-tab="rk"><span data-f="Classement" data-e="Ranking"></span></button>
+  <button data-tab="ad" id="tabAd" class="hide">Admin</button>
+ </nav>
+ <div class="row" style="margin:0"><span id="who"></span><button id="authBtn"></button><button id="langBtn">EN</button></div>
+</header>
+<main>
+<section id="auth" class="card hide">
+ <h2 data-f="Connexion" data-e="Sign in"></h2>
+ <div class="row"><input id="pseudo" placeholder="pseudo" autocomplete="username" maxlength="20"><input id="pass" type="password" placeholder="••••••" autocomplete="current-password">
+ <button class="pri" id="bLogin" data-f="Se connecter" data-e="Sign in"></button><button id="bSign" data-f="Créer mon compte" data-e="Create account"></button></div>
+ <small class="mut" data-f="Pseudo : 3 à 20 lettres/chiffres/_ . Pas besoin d'email. Mot de passe : 6 caractères minimum." data-e="Username: 3–20 letters/digits/_ . No email needed. Password: 6+ characters."></small>
+</section>
+
+<section id="v-ed">
+ <div class="grid"><div>
+  <div class="card">
+   <div class="row">
+    <label><span data-f="Mode" data-e="Mode"></span> <select id="mode"><option value="3">3 <span>adresses</span></option><option value="2">2</option><option value="1">1</option><option value="0">0</option></select></label>
+    <label><span data-f="Entrées (READ)" data-e="Inputs (READ)"></span> <input id="inp" value="4, 3" size="16"></label>
+   </div>
+   <div id="actBar" class="row hide" style="background:#e3efec;padding:8px;border-radius:8px"></div>
+   <textarea id="ed" spellcheck="false" autocapitalize="characters" autocomplete="off"></textarea>
+   <div id="code" class="code hide" title="clic = modifier"></div>
+   <div class="row">
+    <button class="pri" id="bRun">▶ <span data-f="Exécuter" data-e="Run"></span></button>
+    <button id="bEdit" class="hide">✏️ <span data-f="Modifier" data-e="Edit"></span></button>
+    <button id="bVal" class="hide">✔ <span data-f="Valider l'exercice" data-e="Check exercise"></span></button>
+    <span id="diagSum"></span>
+   </div>
+  </div>
+  <details class="card"><summary data-f="Aide-mémoire du cours (syntaxe autorisée)" data-e="Course cheat-sheet (allowed syntax)"></summary><pre id="cheat" style="white-space:pre-wrap;font:13px 'JetBrains Mono',monospace"></pre></details>
+ </div><div>
+  <div class="card"><h2 data-f="Mémoire" data-e="Memory"></h2>
+   <div class="tanks" id="tanks"></div>
+   <div class="row" id="player">
+    <button id="pPrev">◀</button><button id="pPlay">⏵</button><button id="pNext">▶</button>
+    <input type="range" id="pRange" min="0" max="0" value="0" style="flex:1">
+   </div>
+   <div class="mut" id="stepInfo"></div>
+  </div>
+  <div class="card"><h2 data-f="Sortie" data-e="Output"></h2><div class="out" id="out"></div></div>
+ </div></div>
+</section>
+
+<section id="v-ex" class="hide"><div id="exList"></div></section>
+<section id="v-rk" class="hide"><div class="card"><h2 data-f="Classement de la classe" data-e="Class ranking"></h2><div id="rk"></div></div></section>
+<section id="v-ad" class="hide"><div class="card"><h2>Admin</h2><div id="ad"></div></div></section>
+</main>
+<div id="toast" class="hide"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+/* ====== CONFIG : coller ici les 2 valeurs Supabase (voir LISEZMOI.md). Vide = mode invité local ====== */
+const SUPA_URL='https://irinzzwyykkretlopmcf.supabase.co', SUPA_KEY='sb_publishable_zh8YcRw2SIALSKJ6dBdIRQ_2HltkafB';
+/* ================================================================================================= */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+let lang=localStorage.lang||'fr'; const T=(f,e)=>lang==='fr'?f:e;
+const sb=(SUPA_URL&&window.supabase)?supabase.createClient(SUPA_URL,SUPA_KEY):null;
+let me=null,isAdmin=false,act=null,TR=[],P=null,diag=[],cur=0,timer=null,done=JSON.parse(localStorage.done||'{}');
+const AR=['ADD','SUB','MPY','DIV'],BR=['BR','BGT','BGE','BLT','BLE','BEZ'];
+const SYN={MUL:'MPY',MULT:'MPY',MULTIPLY:'MPY',SUBTRACT:'SUB',SUBSTRACT:'SUB',DIVIDE:'DIV',PLUS:'ADD',MINUS:'SUB',MOV:'LOAD / STORE',MOVE:'LOAD / STORE',LDA:'LOAD',STA:'STORE',JMP:'BR',JUMP:'BR',GOTO:'BR',BRANCH:'BR',BEQ:'BEZ',BNE:'BGT / BLT',HALT:'STOP',END:'STOP',INPUT:'READ',IN:'READ',OUT:'WRITE',OUTPUT:'WRITE',CMP:'SUB'};
+const SAMPLE={3:'READ A\nREAD B\nADD A, B, X\nWRITE X',2:'READ A\nREAD B\nSUB X, X\nADD X, A\nADD X, B\nWRITE X',1:'READ A\nREAD B\nLOAD A\nADD B\nSTORE X\nWRITE X',0:'READ A\nREAD B\nPUSH A\nPUSH B\nADD\nPOP X\nWRITE X'};
+const CHEAT=()=>T(
+`3 adresses : ADD|SUB|MPY|DIV OP1, OP2, OP3   (OP3 ← OP1 Co OP2)
+2 adresses : ADD|SUB|MPY|DIV OP1, OP2        (OP1 ← OP1 Co OP2)
+1 adresse  : LOAD OP (AC ← OP) · STORE OP (OP ← AC)
+             ADD|SUB|MPY|DIV OP              (AC ← AC Co OP)
+0 adresse  : PUSH X · POP X · ADD|SUB|MPY|DIV
+             (SL) Co (TL) → SL, puis POP
+Branchement: BR X · BGT X · BGE X · BLT X · BLE X · BEZ X
+             (selon le dernier résultat arithmétique)
+E/S        : READ X · WRITE X · PRINT ('texte') · STOP
+Étiquette  : L1: instruction     Commentaire : ; ...`,
+`3 addresses: ADD|SUB|MPY|DIV OP1, OP2, OP3   (OP3 ← OP1 Co OP2)
+2 addresses: ADD|SUB|MPY|DIV OP1, OP2        (OP1 ← OP1 Co OP2)
+1 address  : LOAD OP (AC ← OP) · STORE OP (OP ← AC)
+             ADD|SUB|MPY|DIV OP              (AC ← AC Co OP)
+0 address  : PUSH X · POP X · ADD|SUB|MPY|DIV
+             (SL) Co (TL) → SL, then POP
+Branching  : BR X · BGT X · BGE X · BLT X · BLE X · BEZ X
+             (on the last arithmetic result)
+I/O        : READ X · WRITE X · PRINT ('text') · STOP
+Label      : L1: instruction     Comment : ; ...`);
+
+/* ---------- Analyse syntaxique (syntaxe du cours uniquement) ---------- */
+function parse(src,mode){
+ const ins=[],errs=[],labels={},vars=[];
+ const need=+mode===3?3:+mode===2?2:+mode===1?1:0;
+ const sig=[T('aucun opérande : (SL) Co (TL) → SL, POP','no operand: (SL) Co (TL) → SL, POP'),'OP  (AC ← AC Co OP)','OP1, OP2  (OP1 ← OP1 Co OP2)','OP1, OP2, OP3  (OP3 ← OP1 Co OP2)'][need];
+ const known=[...AR,...BR,'READ','WRITE','PRINT','STOP',...(+mode===1?['LOAD','STORE']:[]),...(+mode===0?['PUSH','POP']:[])];
+ const addVar=x=>{if(!vars.includes(x))vars.push(x)};
+ src.split('\n').forEach((raw,i)=>{
+  let s=raw.replace(/(;|\/\/).*$/,'').trim(); if(!s)return;
+  const E=(m,w)=>errs.push({line:i,msg:m,w});
+  const lb=s.match(/^([A-Za-z]\w*)\s*:\s*(.*)$/);
+  if(lb){ if(lb[1] in labels)E(T(`L'étiquette « ${lb[1]} » est définie deux fois : chaque adresse d'instruction doit être unique.`,`Label “${lb[1]}” is defined twice: each instruction address must be unique.`)); labels[lb[1]]=ins.length; s=lb[2].trim(); if(!s)return; }
+  const mm=s.match(/^(\S+)\s*(.*)$/), op=mm[1], OP=op.toUpperCase(), rest=mm[2].trim();
+  if(!known.includes(OP)){
+   const wrong=['LOAD','STORE'].includes(OP)?1:['PUSH','POP'].includes(OP)?0:null;
+   if(wrong!==null)E(T(`${OP} est réservée à la programmation à ${wrong} adresse${wrong?'':'s'} ; vous êtes en mode ${mode} adresse(s). Changez de mode ou utilisez les instructions de ce mode.`,`${OP} is reserved for ${wrong}-address programming; you are in ${mode}-address mode.`));
+   else E(T(`« ${op} » n'existe pas dans le cours.`+(SYN[OP]?` Vouliez-vous écrire ${SYN[OP]} ?`:` Instructions valides : ${known.join(', ')}.`),`“${op}” is not in the course.`+(SYN[OP]?` Did you mean ${SYN[OP]}?`:` Valid instructions: ${known.join(', ')}.`)));
+   return;
+  }
+  if(op!==OP)E(T(`Le cours écrit les codes opération en majuscules : ${OP}.`,`The course writes opcodes in capitals: ${OP}.`),1);
+  if(OP==='PRINT'){
+   const r=rest.replace(/^\((.*)\)$/,'$1').trim(), items=(r.match(/\s*('[^']*'|‘[^’]*’|"[^"]*"|[^,]+)\s*/g)||[]).map(x=>x.trim());
+   if(!items.length)return E(T('PRINT attend un texte entre quotes ou une variable : PRINT (\'YES\') ou PRINT X.','PRINT expects a quoted text or a variable: PRINT (\'YES\') or PRINT X.'));
+   for(const it of items){ if(!/^['‘"]/.test(it)){ if(!/^[A-Za-z]\w*$/.test(it))return E(T(`« ${it} » n'est pas une variable valide.`,`“${it}” is not a valid variable.`)); addVar(it);} }
+   return ins.push({op:OP,a:items,line:i});
+  }
+  const n=AR.includes(OP)?need:OP==='STOP'?0:1;
+  const args=rest?rest.split(',').map(x=>x.trim()):[];
+  if(args.length!==n||args.some(a=>!a)){
+   if(args.some(a=>/\s/.test(a)))return E(T('Virgule manquante : les opérandes sont séparés par des virgules (OP1, OP2, OP3).','Missing comma: operands are separated by commas (OP1, OP2, OP3).'));
+   return E(T(`${OP} attend ${n} opérande(s) dans ce mode — structure : ${AR.includes(OP)?OP+' '+sig:OP+(n?' X':'')}.`,`${OP} expects ${n} operand(s) in this mode — structure: ${AR.includes(OP)?OP+' '+sig:OP+(n?' X':'')}.`));
+  }
+  for(const a of args){
+   if(/^-?\d+(\.\d+)?$/.test(a))return E(T(`Constante « ${a} » interdite : le cours n'utilise que des adresses symboliques. Initialisez avec READ, ou obtenez 0 avec SUB A, A, A (cours p.12).`,`Constant “${a}” not allowed: the course only uses symbolic addresses. Initialize with READ, or get 0 with SUB A, A, A (course p.12).`));
+   if(!/^[A-Za-z]\w*$/.test(a))return E(T(`« ${a} » n'est pas une adresse symbolique valide (lettres/chiffres, commence par une lettre).`,`“${a}” is not a valid symbolic address.`));
+  }
+  if(!BR.includes(OP))args.forEach(addVar);
+  ins.push({op:OP,a:args,line:i});
+ });
+ ins.forEach(x=>{if(BR.includes(x.op)&&!(x.a[0] in labels))errs.push({line:x.line,msg:T(`L'adresse « ${x.a[0]} » n'existe pas : ajoutez « ${x.a[0]}: » devant l'instruction visée.`,`Address “${x.a[0]}” does not exist: add “${x.a[0]}:” before the target instruction.`)})});
+ return {ins,errs,labels,vars};
+}
+
+/* ---------- Exécution (sémantique du cours) ---------- */
+function exec(P,mode,inp){
+ mode=+mode;const v={},st=[],out=[],tr=[],ws=[],q=[...inp];let ac=null,fl=null,pc=0,n=0;
+ const snap=l=>tr.push({line:l,v:{...v},st:[...st],ac,fl,out:[...out]});
+ snap(-1);
+ try{ while(pc<P.ins.length){
+  const I=P.ins[pc],o=I.op,a=I.a,L=I.line;let next=pc+1;
+  const bad=m=>{throw{line:L,msg:m}};
+  if(++n>2000)bad(T('Boucle infinie probable (plus de 2000 instructions). Vérifiez la condition de votre branchement.','Probable infinite loop (2000+ instructions). Check your branch condition.'));
+  const get=x=>{if(!(x in v)){ if(!(o==='SUB'&&a[0]===a[1]&&x===a[0])&&!ws.some(w=>w.line===L))ws.push({line:L,w:1,msg:T(`« ${x} » n'a pas encore de valeur (READ ou calcul préalable) : lu comme 0.`,`“${x}” has no value yet (READ or earlier computation): read as 0.`)}); return 0;} return v[x];};
+  if(AR.includes(o)){
+   let x,y;
+   if(mode>=2){x=get(a[0]);y=get(a[1]);}
+   else if(mode===1){if(ac===null)bad(T('L\'accumulateur est vide : faites d\'abord LOAD OP.','The accumulator is empty: do LOAD OP first.'));x=ac;y=get(a[0]);}
+   else{if(st.length<2)bad(T(`${o} exige 2 entrées dans la pile (TL et SL) ; il y en a ${st.length}. Faites deux PUSH avant.`,`${o} needs 2 stack entries (TL and SL); there are ${st.length}. PUSH twice first.`));y=st.pop();x=st.pop();}
+   if(o==='DIV'&&y===0)bad(T('Division par 0 : le diviseur vaut 0.','Division by 0: the divisor is 0.'));
+   const r=o==='ADD'?x+y:o==='SUB'?x-y:o==='MPY'?x*y:Math.trunc(x/y);fl=r;
+   if(mode===3)v[a[2]]=r;else if(mode===2)v[a[0]]=r;else if(mode===1)ac=r;else st.push(r);
+  }else if(o==='LOAD')ac=get(a[0]);
+  else if(o==='STORE'){if(ac===null)bad(T('L\'accumulateur est vide : rien à STOCKer.','The accumulator is empty: nothing to STORE.'));v[a[0]]=ac;}
+  else if(o==='PUSH')st.push(get(a[0]));
+  else if(o==='POP'){if(!st.length)bad(T('POP sur une pile vide.','POP on an empty stack.'));v[a[0]]=st.pop();}
+  else if(o==='READ'){if(!q.length)bad(T('READ : plus de valeur dans le champ « Entrées ».','READ: no more values in the “Inputs” field.'));const x=q.shift();if(Number.isNaN(x))bad(T('Entrée non numérique.','Non-numeric input.'));v[a[0]]=x;}
+  else if(o==='WRITE')out.push(String(get(a[0])));
+  else if(o==='PRINT')out.push(a.map(x=>/^['‘"]/.test(x)?x.slice(1,-1).trim():String(get(x))).join(' '));
+  else if(o==='STOP'){snap(L);break;}
+  else if(BR.includes(o)){
+   if(o!=='BR'&&fl===null)bad(T(`${o} teste le résultat d'une opération arithmétique, mais il n'y en a pas encore eu.`,`${o} tests an arithmetic result, but none has been computed yet.`));
+   if(o==='BR'||{BGT:fl>0,BGE:fl>=0,BLT:fl<0,BLE:fl<=0,BEZ:fl===0}[o])next=P.labels[a[0]];
+  }
+  snap(L);pc=next;
+ }}catch(e){if(e&&e.msg)return{tr,err:e,ws};throw e}
+ return{tr,ws};
+}
+
+/* ---------- Interface éditeur / visualisation ---------- */
+const ed=$('#ed'),code=$('#code');
+const inputs=()=>$('#inp').value.split(/[\s,;]+/).filter(Boolean).map(Number);
+function run(){
+ const mode=+$('#mode').value;P=parse(ed.value,mode);diag=[...P.errs];TR=[];
+ if(!P.errs.some(e=>!e.w)){const r=exec(P,mode,inputs());TR=r.tr;if(r.err)diag.push(r.err);diag.push(...r.ws);if(!r.err)log('run')}
+ const ne=diag.filter(d=>!d.w).length,nw=diag.length-ne;
+ $('#diagSum').innerHTML=ne?`<span class="bad">✘ ${ne} ${T('erreur(s)','error(s)')}</span>`:`<span class="ok">✔ ${T('Aucune erreur','No errors')}</span>`+(nw?` <span style="color:var(--warn)">⚠ ${nw}</span>`:'');
+ drawCode(-1);ed.classList.add('hide');code.classList.remove('hide');$('#bEdit').classList.remove('hide');
+ const pr=$('#pRange');pr.max=Math.max(TR.length-1,0);setStep(Math.max(TR.length-1,0));
+}
+function drawCode(k){
+ const cl=ed.value.split('\n');
+ code.innerHTML=cl.map((t,i)=>{const d=diag.filter(x=>x.line===i),e=d.some(x=>!x.w);
+  return `<div class="ln ${e?'err':d.length?'wrn':''} ${k===i?'cur':''}"><b>${i+1}</b>${esc(t)||' '}</div>`+d.map(x=>`<div class="note ${x.w?'w':'e'}">${x.w?'⚠':'✘'} ${esc(x.msg)}</div>`).join('')}).join('');
+}
+function setStep(k){
+ cur=k;const s=TR[k],mode=+$('#mode').value;
+ if(!s){$('#tanks').innerHTML='';$('#out').textContent='';$('#stepInfo').textContent='';return}
+ const p=TR[k-1]||s;drawCode(s.line);$('#pRange').value=k;
+ let h=(P.vars||[]).map(x=>{const val=s.v[x],ch=p.v[x]!==val,neg=val<0;
+  return `<div class="tank ${ch?'ch':''}">${esc(x)}<div class="cup ${neg?'neg':''}"><i style="height:${val===undefined?0:Math.min(100,18+Math.abs(val)*3)}%"></i><span><u>${val===undefined?'':val}</u></span></div></div>`}).join('');
+ if(mode===1)h+=`<div class="tank ${p.ac!==s.ac?'ch':''}">AC<div class="cup"><i style="height:${s.ac===null?0:Math.min(100,18+Math.abs(s.ac)*3)}%"></i><span><u>${s.ac===null?'':s.ac}</u></span></div></div>`;
+ if(mode===0){const n=s.st.length;h+=`<div class="stwrap"><div class="stack">`+s.st.map((x,i)=>`<div class="cell">${x}${i===n-1?'<em>TL</em>':i===n-2?'<em>SL</em>':''}</div>`).reverse().join('')+`</div><div class="tank">${T('pile','stack')}</div></div>`}
+ if(s.fl!==null)h+=`<div class="tank">${T('résultat','result')}<div class="mut">${s.fl}</div></div>`;
+ $('#tanks').innerHTML=h;$('#out').textContent=s.out.join('\n');
+ $('#stepInfo').textContent=T('Étape','Step')+` ${k}/${TR.length-1}`;
+}
+const stop=()=>{clearInterval(timer);timer=null;$('#pPlay').textContent='⏵'};
+$('#pPrev').onclick=()=>{stop();setStep(Math.max(0,cur-1))};$('#pNext').onclick=()=>{stop();setStep(Math.min(TR.length-1,cur+1))};
+$('#pRange').oninput=e=>{stop();setStep(+e.target.value)};
+$('#pPlay').onclick=()=>{if(timer)return stop();if(cur>=TR.length-1)setStep(0);$('#pPlay').textContent='⏸';timer=setInterval(()=>cur>=TR.length-1?stop():setStep(cur+1),700)};
+$('#bRun').onclick=()=>{stop();run()};
+const toEdit=()=>{stop();code.classList.add('hide');ed.classList.remove('hide');$('#bEdit').classList.add('hide');ed.focus()};
+$('#bEdit').onclick=toEdit;code.onclick=toEdit;
+ed.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();document.execCommand('insertText',false,'    ')}});
+ed.addEventListener('paste',e=>{if(act){e.preventDefault();toast(T('Collage désactivé pendant un exercice : tapez votre code.','Pasting is disabled during an exercise: type your code.'))}});
+$('#mode').onchange=()=>{if(!act&&Object.values(SAMPLE).includes(ed.value)||!ed.value.trim())ed.value=SAMPLE[$('#mode').value];toEdit()};
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.remove('hide');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.add('hide'),4500)}
+
+/* ---------- Exercices ---------- */
+const EX=[
+{id:'sum',xp:10,ti:['Somme de deux nombres','Sum of two numbers'],d:['Lire A puis B, calculer X = A + B et écrire X (WRITE X).','Read A then B, compute X = A + B and write X.'],t:[[4,3],[-5,8],[0,0],[10,25]],r:(a,b)=>[a+b]},
+{id:'formula',xp:25,ti:['Formule du cours : Z = A*B + C/D','Course formula: Z = A*B + C/D'],d:['Lire A, B, C, D (dans cet ordre), calculer Z = A*B + C/D (division entière), écrire Z. Exemple du cours p.14.','Read A, B, C, D (in that order), compute Z = A*B + C/D (integer division), write Z. Course example p.14.'],t:[[4,3,10,2],[5,5,9,3],[2,7,15,4],[3,3,8,2]],r:(a,b,c,d)=>[a*b+Math.trunc(c/d)]},
+{id:'squares',xp:15,ti:['Somme des carrés','Sum of squares'],d:['Lire A et B, écrire A*A + B*B.','Read A and B, write A*A + B*B.'],t:[[3,4],[5,12],[0,2],[-3,3]],r:(a,b)=>[a*a+b*b]},
+{id:'abs',xp:15,ti:['Valeur absolue','Absolute value'],d:['Lire A, écrire |A|. Utilisez un branchement (BLT, BGE…).','Read A, write |A|. Use a branch (BLT, BGE…).'],t:[[5],[-7],[0],[-1]],r:a=>[Math.abs(a)]},
+{id:'swap',xp:20,ti:['Permutation (TD1 ex.5)','Swap (TD1 ex.5)'],d:['Lire A et B ; permuter si nécessaire pour que A soit le plus grand et B le plus petit. Écrire A puis B.','Read A and B; swap if needed so A is the larger and B the smaller. Write A then B.'],t:[[5,3],[3,5],[7,7],[-2,4]],r:(a,b)=>[Math.max(a,b),Math.min(a,b)]},
+{id:'parity',xp:20,ti:['Parité (inspiré TD1 ex.3)','Parity (from TD1 ex.3)'],d:["Lire A. Afficher PRINT ('YES') si A est pair, sinon PRINT ('NOT').","Read A. PRINT ('YES') if A is even, otherwise PRINT ('NOT')."],t:[[28],[33],[0],[7]],r:a=>[a%2===0?'YES':'NOT']},
+{id:'pyth',xp:30,ti:['Triplet de Pythagore (TD1 ex.7)','Pythagorean triple (TD1 ex.7)'],d:["Lire A, B, C (déjà rangés a<b<c). PRINT ('YES') si A²+B²=C², sinon PRINT ('NOT').","Read A, B, C (already sorted a<b<c). PRINT ('YES') if A²+B²=C², else PRINT ('NOT')."],t:[[3,4,5],[5,12,13],[2,3,4],[6,8,10],[1,2,3]],r:(a,b,c)=>[a*a+b*b===c*c?'YES':'NOT']}];
+const xpOf=()=>EX.reduce((s,e)=>s+[0,1,2,3].filter(m=>done[e.id+':'+m]).length*e.xp,0);
+function drawEx(){
+ $('#exList').innerHTML=`<div class="card"><b>XP : ${xpOf()}</b> · ${T('Niveau','Level')} ${Math.floor(xpOf()/50)+1}</div>`+EX.map(e=>`<div class="ex"><b>${esc(e.ti[lang==='fr'?0:1])}</b> <span class="badge">${e.xp} XP / mode</span><p>${esc(e.d[lang==='fr'?0:1])}</p><div class="row">`+
+  [3,2,1,0].map(m=>`<button data-ex="${e.id}" data-m="${m}">${done[e.id+':'+m]?'✔ ':''}${m} ${T('adr.','addr.')}</button>`).join('')+`</div></div>`).join('');
+ $$('[data-ex]').forEach(b=>b.onclick=()=>startEx(b.dataset.ex,+b.dataset.m));
+}
+function startEx(id,m){
+ act=EX.find(e=>e.id===id);act.m=m;$('#mode').value=m;ed.value='; '+act.ti[lang==='fr'?0:1]+'\n';
+ $('#actBar').innerHTML=`<b>${esc(act.ti[lang==='fr'?0:1])}</b> — ${esc(act.d[lang==='fr'?0:1])} <button id="bQuit">✕</button>`;
+ $('#actBar').classList.remove('hide');$('#bVal').classList.remove('hide');$('#bQuit').onclick=()=>{act=null;$('#actBar').classList.add('hide');$('#bVal').classList.add('hide')};
+ tab('ed');toEdit();
+}
+$('#bVal').onclick=()=>{
+ stop();run();const mode=+$('#mode').value;if(!act)return;
+ if(diag.some(d=>!d.w))return toast(T('Corrigez d\'abord les erreurs signalées en rouge.','Fix the red errors first.'));
+ const Pp=parse(ed.value,mode);let k=0;
+ for(const t of act.t){const r=exec(Pp,mode,t),exp=act.r(...t).map(String),got=r.err?null:r.tr[r.tr.length-1].out;k++;
+  if(!got||got.join('|')!==exp.join('|'))return toast(T(`✘ Test ${k}/${act.t.length} raté — entrées : ${t.join(', ')} · attendu : ${exp.join(' ')} · obtenu : ${got?got.join(' ')||'(rien)':'erreur : '+r.err.msg}`,`✘ Test ${k}/${act.t.length} failed — inputs: ${t.join(', ')} · expected: ${exp.join(' ')} · got: ${got?got.join(' ')||'(nothing)':'error: '+r.err.msg}`));}
+ const key=act.id+':'+mode,first=!done[key];done[key]=1;localStorage.done=JSON.stringify(done);
+ if(sb&&me)sb.rpc('complete_exercise',{p_ex:act.id,p_mode:mode});
+ toast(first?T(`🎉 Réussi ! +${act.xp} XP`,`🎉 Passed! +${act.xp} XP`):T('✔ Réussi (déjà validé)','✔ Passed (already completed)'));
+};
+
+/* ---------- Comptes, classement, admin (Supabase) ---------- */
+const log=k=>{if(sb&&me)sb.from('activity').insert({user_id:me.id,kind:k}).then(()=>{})};
+const mail=p=>p.toLowerCase()+'@enspy-asm.app';
+async function auth(sign){
+ const p=$('#pseudo').value.trim(),pw=$('#pass').value;
+ if(!sb)return toast(T('Mode invité : serveur non configuré.','Guest mode: server not configured.'));
+ if(!/^[A-Za-z0-9_]{3,20}$/.test(p))return toast(T('Pseudo invalide (3-20 lettres, chiffres ou _).','Invalid username (3–20 letters, digits or _).'));
+ const r=sign?await sb.auth.signUp({email:mail(p),password:pw,options:{data:{pseudo:p}}}):await sb.auth.signInWithPassword({email:mail(p),password:pw});
+ if(r.error)return toast(r.error.message.includes('already')?T('Ce pseudo existe déjà.','Username already taken.'):r.error.message.includes('Invalid login')?T('Pseudo ou mot de passe incorrect.','Wrong username or password.'):r.error.message);
+ $('#auth').classList.add('hide');
+}
+$('#bLogin').onclick=()=>auth(0);$('#bSign').onclick=()=>auth(1);
+$('#authBtn').onclick=async()=>{if(me){await sb.auth.signOut()}else $('#auth').classList.toggle('hide')};
+async function onUser(u){
+ me=u;isAdmin=false;
+ if(u){const{data}=await sb.from('profiles').select('pseudo,is_admin').eq('id',u.id).single();
+  isAdmin=!!(data&&data.is_admin);$('#who').textContent=data?data.pseudo:'';log('login');
+  const pr=await sb.from('progress').select('ex_id,mode');(pr.data||[]).forEach(x=>done[x.ex_id+':'+x.mode]=1);localStorage.done=JSON.stringify(done)}
+ else $('#who').textContent=T('Invité','Guest');
+ $('#authBtn').textContent=u?T('Déconnexion','Sign out'):T('Connexion','Sign in');$('#tabAd').classList.toggle('hide',!isAdmin);
+}
+async function drawRk(){
+ if(!sb||!me){$('#rk').innerHTML=`<p class="mut">${T('Connectez-vous pour voir le classement.','Sign in to see the ranking.')}</p>`;return}
+ const{data,error}=await sb.rpc('leaderboard');if(error)return $('#rk').textContent=error.message;
+ const mine=$('#who').textContent;
+ $('#rk').innerHTML=`<table><tr><th>#</th><th>${T('Pseudo','User')}</th><th>XP</th><th>${T('Niveau','Level')}</th><th>${T('Réussis','Solved')}</th></tr>`+data.map((r,i)=>`<tr class="${r.pseudo===mine?'me':''}"><td>${i+1}</td><td>${esc(r.pseudo)}</td><td>${r.xp}</td><td>${Math.floor(r.xp/50)+1}</td><td>${r.solved}</td></tr>`).join('')+'</table>';
+}
+async function drawAd(){
+ const{data,error}=await sb.rpc('admin_stats');if(error)return $('#ad').textContent=error.message;
+ const tot=EX.length*4,now=Date.now(),act24=data.filter(r=>r.last_seen&&now-new Date(r.last_seen)<864e5).length;
+ $('#ad').innerHTML=`<p><b>${data.length}</b> ${T('comptes','accounts')} · <b>${act24}</b> ${T('actifs sur 24 h','active in 24h')}</p><div style="overflow:auto"><table><tr><th>${T('Pseudo','User')}</th><th>${T('Inscrit','Joined')}</th><th>${T('Dernière activité','Last seen')}</th><th>${T('Connexions','Logins')}</th><th>${T('Exécutions','Runs')}</th><th>${T('Exos','Solved')}</th><th>${T('Taux','Rate')}</th><th>XP</th></tr>`+
+ data.map(r=>`<tr><td>${esc(r.pseudo)}</td><td>${new Date(r.created_at).toLocaleDateString()}</td><td>${r.last_seen?new Date(r.last_seen).toLocaleString():'—'}</td><td>${r.logins}</td><td>${r.runs}</td><td>${r.solved}</td><td>${Math.round(100*r.solved/tot)}%</td><td>${r.xp}</td></tr>`).join('')+'</table></div>';
+}
+
+/* ---------- Navigation / langue ---------- */
+function tab(t){$$('[data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));['ed','ex','rk','ad'].forEach(x=>$('#v-'+x).classList.toggle('hide',x!==t));
+ if(t==='ex')drawEx();if(t==='rk')drawRk();if(t==='ad')drawAd()}
+$$('[data-tab]').forEach(b=>b.onclick=()=>tab(b.dataset.tab));
+function applyLang(){document.documentElement.lang=lang;$$('[data-f]').forEach(n=>n.textContent=lang==='fr'?n.dataset.f:n.dataset.e);$('#langBtn').textContent=lang==='fr'?'EN':'FR';
+ $('#cheat').textContent=CHEAT();$('#pseudo').placeholder=T('pseudo','username');$('#pass').placeholder=T('mot de passe','password');
+ $('#authBtn').textContent=me?T('Déconnexion','Sign out'):T('Connexion','Sign in');if(!me)$('#who').textContent=T('Invité','Guest');
+ $$('#mode option').forEach(o=>o.textContent=o.value+' '+T('adresse(s)','address(es)'))}
+$('#langBtn').onclick=()=>{lang=lang==='fr'?'en':'fr';localStorage.lang=lang;applyLang()};
+ed.value=SAMPLE[3];applyLang();
+if(sb){sb.auth.onAuthStateChange((_e,s)=>onUser(s?s.user:null));}else{$('#authBtn').classList.add('hide')}
+</script></body></html>
