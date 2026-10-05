@@ -1,19 +1,24 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14213d"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ASM·ENSPY"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" href="icon-192.png">
 <title>ASM·ENSPY — Pseudo-assembleur</title>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f2f5f1;--ink:#14213d;--mut:#5b6678;--card:#fff;--line:#d5dcd3;--liq:#1f7a8c;--err:#c8372d;--warn:#b7791f;--cur:#fde9a8;--ok:#2f8f5b}
+:root{--bg:#f2f5f1;--ink:#14213d;--mut:#5b6678;--card:#fff;--line:#d5dcd3;--liq:#1f7a8c;--err:#c8372d;--warn:#b7791f;--cur:#fde9a8;--ok:#2f8f5b;--pane:#fff;--edbg:#fcfdfc;--errbg:#fde7e4;--wrnbg:#fff6dd;--hov:#eaf2f0;--tint:#e3efec;--hdr:#14213d;--grid:rgba(20,33,61,.05)}
+:root[data-th=dark]{--bg:#0e1626;--ink:#e6edf3;--mut:#93a0b4;--card:#16213a;--line:#2a3a58;--liq:#2fa4b8;--err:#ff7b72;--warn:#e3b341;--cur:#4a3f12;--ok:#56d364;--pane:#0f1a30;--edbg:#0f1a30;--errbg:#3a1c1f;--wrnbg:#3a3114;--hov:#1f2f50;--tint:#1d3350;--hdr:#0a1020;--grid:rgba(255,255,255,.04);color-scheme:dark}
+html{-webkit-text-size-adjust:100%}
 *{box-sizing:border-box}
-body{margin:0;font:15px/1.5 'Bricolage Grotesque',system-ui,sans-serif;color:var(--ink);background:var(--bg) linear-gradient(rgba(20,33,61,.05) 1px,transparent 1px) 0 0/100% 28px}
-header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px 18px;background:var(--ink);color:#fff}
+body{margin:0;font:15px/1.5 'Bricolage Grotesque',system-ui,sans-serif;color:var(--ink);background:var(--bg) linear-gradient(var(--grid) 1px,transparent 1px) 0 0/100% 28px}
+header>*{margin:2px 6px}header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:12px 18px;padding:max(12px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) 12px max(18px,env(safe-area-inset-left));background:var(--hdr);color:#fff}
 header h1{margin:0;font-size:20px;letter-spacing:.2px}
-nav{display:flex;gap:4px;flex-wrap:wrap}
+nav{display:flex;flex-wrap:wrap}nav button{margin:2px}
 button,select,input,textarea{font:inherit;color:inherit}
-button{cursor:pointer;border:1px solid var(--ink);background:#fff;border-radius:8px;padding:6px 12px}
-button:hover{background:#eaf2f0}button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #f2a900;outline-offset:1px}
+button{cursor:pointer;border:1px solid var(--ink);background:var(--pane);border-radius:8px;padding:6px 12px}
+button:hover{background:var(--hov)}button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #f2a900;outline-offset:1px}
 header button{background:transparent;color:#fff;border-color:#ffffff66}
-header button.on{background:#fff;color:var(--ink)}
+header button.on{background:#fff;color:#14213d}
 button.pri{background:var(--liq);color:#fff;border-color:var(--liq);font-weight:600}
 main{max-width:1180px;margin:0 auto;padding:16px}
 .hide{display:none!important}
@@ -21,36 +26,41 @@ main{max-width:1180px;margin:0 auto;padding:16px}
 @media(max-width:860px){.grid{grid-template-columns:1fr}}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:16px}
 .card h2{margin:0 0 8px;font-size:16px}
-.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
-textarea,input,select{border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:#fff}
-textarea{width:100%;min-height:250px;font:14px/1.6 'JetBrains Mono',monospace;resize:vertical;tab-size:4}
-.code{font:14px/1.6 'JetBrains Mono',monospace;border:1px solid var(--line);border-radius:8px;background:#fcfdfc;cursor:text;max-height:420px;overflow:auto}
+.row{display:flex;flex-wrap:wrap;align-items:center;margin:8px 0}.row>*{margin:0 8px 8px 0}
+textarea,input,select{border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:var(--pane);font-size:16px}
+textarea{width:100%;min-height:250px;font:16px/1.6 'JetBrains Mono',monospace;resize:vertical;tab-size:4}
+.code{font:16px/1.6 'JetBrains Mono',monospace;border:1px solid var(--line);border-radius:8px;background:var(--edbg);cursor:text;max-height:420px;overflow:auto}
 .ln{display:flex;border-left:4px solid transparent;white-space:pre}
 .ln b{width:36px;flex:none;text-align:right;padding-right:8px;color:var(--mut);font-weight:400;user-select:none}
 .ln.cur{background:var(--cur);border-left-color:#f2a900}
-.ln.err{background:#fde7e4;border-left-color:var(--err)}.ln.wrn{background:#fff6dd;border-left-color:var(--warn)}
+.ln.err{background:var(--errbg);border-left-color:var(--err)}.ln.wrn{background:var(--wrnbg);border-left-color:var(--warn)}
 .note{font:13px/1.4 'Bricolage Grotesque',sans-serif;padding:3px 10px 5px 40px;white-space:normal}
-.note.e{background:#fde7e4;color:var(--err)}.note.w{background:#fff6dd;color:var(--warn)}
-.tanks{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.note.e{background:var(--errbg);color:var(--err)}.note.w{background:var(--wrnbg);color:var(--warn)}
+.tanks{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));grid-gap:12px 8px;align-items:end;justify-items:center}.aux{display:flex;flex-wrap:wrap;align-items:flex-end}.aux>*{margin:0 14px 12px 0}.dense .cup{width:58px;height:66px}.dense .cup span{font-size:14px}.cup span.sm{font-size:12px}.tank{max-width:92px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cell{margin-bottom:3px}
 .tank{text-align:center;font:600 14px 'JetBrains Mono',monospace}
-.cup{position:relative;width:76px;height:98px;border:3px solid var(--ink);border-top:0;border-radius:0 0 12px 12px;overflow:hidden;background:#fff;margin-top:4px}
+.cup{position:relative;width:76px;height:98px;border:3px solid var(--ink);border-top:0;border-radius:0 0 12px 12px;overflow:hidden;background:var(--pane);margin-top:4px}
 .cup i{position:absolute;left:0;right:0;bottom:0;background:var(--liq);opacity:.8;transition:height .5s}
 .cup.neg i{background:#8e4a7a}
-.cup span{position:absolute;inset:0;display:grid;place-items:center;font-size:18px}
-.cup span u{text-decoration:none;background:#ffffffd9;padding:0 6px;border-radius:6px}
+.cup span{position:absolute;top:0;left:0;right:0;bottom:0;display:grid;place-items:center;font-size:18px}
+.cup span u{text-decoration:none;background:var(--pane);padding:0 6px;border-radius:6px}
 .ch .cup{animation:pop .6s}@keyframes pop{40%{transform:scale(1.1)}}
 @media(prefers-reduced-motion:reduce){.ch .cup{animation:none}.cup i{transition:none}}
-.stack{display:flex;flex-direction:column;width:96px;min-height:130px;justify-content:flex-end;border:3px solid var(--ink);border-top:0;border-radius:0 0 12px 12px;padding:4px;gap:3px;background:#fff}
+.stack{display:flex;flex-direction:column;width:96px;min-height:130px;justify-content:flex-end;border:3px solid var(--ink);border-top:0;border-radius:0 0 12px 12px;padding:4px 4px 1px;background:var(--pane)}
 .cell{position:relative;background:var(--liq);color:#fff;border-radius:6px;padding:4px 8px;font:600 15px 'JetBrains Mono',monospace;text-align:center}
 .cell em{position:absolute;left:-30px;top:5px;font:600 12px 'JetBrains Mono',monospace;color:var(--ink);font-style:normal}
 .stwrap{margin-left:30px}
-.out{font:600 15px 'JetBrains Mono',monospace;background:var(--ink);color:#cfe;border-radius:8px;padding:8px 12px;min-height:40px;white-space:pre-wrap}
+.out{font:600 15px 'JetBrains Mono',monospace;background:var(--hdr);color:#cfe;border-radius:8px;padding:8px 12px;min-height:40px;white-space:pre-wrap}
 table{border-collapse:collapse;width:100%}th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:left}
 .ex{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px}
 .ok{color:var(--ok);font-weight:600}.bad{color:var(--err);font-weight:600}.mut{color:var(--mut)}
-.badge{display:inline-block;padding:1px 8px;border-radius:99px;background:#e3efec;margin-right:4px;font-size:13px}
-.me{background:#fff6dd}
-#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;max-width:90vw}
+.badge{display:inline-block;padding:1px 8px;border-radius:99px;background:var(--tint);margin-right:4px;font-size:13px}
+.me{background:var(--wrnbg)}
+#toast{z-index:9;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--hdr);color:#fff;padding:10px 16px;border-radius:10px;max-width:90vw}
+.sug{display:flex;flex-wrap:wrap;margin:6px 0;min-height:34px}.sug button{margin:0 6px 6px 0;font:600 15px 'JetBrains Mono',monospace;padding:3px 10px}
+.sol{font:15px/1.5 'JetBrains Mono',monospace;background:var(--edbg);border:1px solid var(--line);border-radius:8px;padding:8px;overflow:auto;margin:6px 0;-webkit-overflow-scrolling:touch}
+body{-webkit-tap-highlight-color:transparent}button,select{touch-action:manipulation}
+button,textarea,input:not([type=range]){-webkit-appearance:none;appearance:none}
+.code{-webkit-overflow-scrolling:touch}textarea{-webkit-user-select:text;user-select:text}
 </style></head><body>
 <header>
  <h1>ASM·ENSPY <span class="mut" style="color:#9fb">HN_ING1</span></h1>
@@ -60,26 +70,28 @@ table{border-collapse:collapse;width:100%}th,td{padding:6px 8px;border-bottom:1p
   <button data-tab="rk"><span data-f="Classement" data-e="Ranking"></span></button>
   <button data-tab="ad" id="tabAd" class="hide">Admin</button>
  </nav>
- <div class="row" style="margin:0"><span id="who"></span><button id="authBtn"></button><button id="langBtn">EN</button></div>
+ <div class="row" style="margin:0"><span id="who"></span><button id="authBtn"></button><button id="langBtn">EN</button><button id="thBtn" aria-label="Thème / Theme">🌙</button></div>
 </header>
 <main>
 <section id="auth" class="card hide">
  <h2 data-f="Connexion" data-e="Sign in"></h2>
- <div class="row"><input id="pseudo" placeholder="pseudo" autocomplete="username" maxlength="20"><input id="pass" type="password" placeholder="••••••" autocomplete="current-password">
- <button class="pri" id="bLogin" data-f="Se connecter" data-e="Sign in"></button><button id="bSign" data-f="Créer mon compte" data-e="Create account"></button></div>
+ <form id="authForm" class="row" autocomplete="on"><input id="pseudo" name="username" placeholder="pseudo" autocomplete="username" autocapitalize="none" autocorrect="off" maxlength="20"><input id="pass" name="password" type="password" placeholder="••••••" autocomplete="current-password">
+ <button class="pri" id="bLogin" type="submit" data-f="Se connecter" data-e="Sign in"></button><button id="bSign" type="button" data-f="Créer mon compte" data-e="Create account"></button><button id="bLater" type="button" data-f="Plus tard" data-e="Later"></button></form>
  <small class="mut" data-f="Pseudo : 3 à 20 lettres/chiffres/_ . Pas besoin d'email. Mot de passe : 6 caractères minimum." data-e="Username: 3–20 letters/digits/_ . No email needed. Password: 6+ characters."></small>
 </section>
 
+<div id="tip" class="card hide"><b data-f="📲 Astuce iPhone/iPad :" data-e="📲 iPhone/iPad tip:"></b> <span data-f="Safari → bouton Partager → « Sur l'écran d'accueil ». Le site s'ouvre comme une app, avec son icône, et vous restez connecté." data-e="Safari → Share → “Add to Home Screen”. It opens like an app, with its icon, and keeps you signed in."></span> <button id="tipx">✕</button></div>
 <section id="v-ed">
  <div class="grid"><div>
   <div class="card">
    <div class="row">
     <label><span data-f="Mode" data-e="Mode"></span> <select id="mode"><option value="3">3 <span>adresses</span></option><option value="2">2</option><option value="1">1</option><option value="0">0</option></select></label>
-    <label><span data-f="Entrées (READ)" data-e="Inputs (READ)"></span> <input id="inp" value="4, 3" size="16"></label>
+    <label><span data-f="Entrées (READ)" data-e="Inputs (READ)"></span> <input id="inp" value="4, 3" size="26"></label>
    </div>
-   <div id="actBar" class="row hide" style="background:#e3efec;padding:8px;border-radius:8px"></div>
+   <div id="actBar" class="row hide" style="background:var(--tint);padding:8px;border-radius:8px"></div>
    <textarea id="ed" spellcheck="false" autocapitalize="characters" autocomplete="off"></textarea>
    <div id="code" class="code hide" title="clic = modifier"></div>
+   <div id="sug" class="sug"></div>
    <div class="row">
     <button class="pri" id="bRun">▶ <span data-f="Exécuter" data-e="Run"></span></button>
     <button id="bEdit" class="hide">✏️ <span data-f="Modifier" data-e="Edit"></span></button>
@@ -90,7 +102,7 @@ table{border-collapse:collapse;width:100%}th,td{padding:6px 8px;border-bottom:1p
   <details class="card"><summary data-f="Aide-mémoire du cours (syntaxe autorisée)" data-e="Course cheat-sheet (allowed syntax)"></summary><pre id="cheat" style="white-space:pre-wrap;font:13px 'JetBrains Mono',monospace"></pre></details>
  </div><div>
   <div class="card"><h2 data-f="Mémoire" data-e="Memory"></h2>
-   <div class="tanks" id="tanks"></div>
+   <div class="aux" id="aux"></div><div class="tanks" id="tanks"></div>
    <div class="row" id="player">
     <button id="pPrev">◀</button><button id="pPlay">⏵</button><button id="pNext">▶</button>
     <input type="range" id="pRange" min="0" max="0" value="0" style="flex:1">
@@ -107,16 +119,20 @@ table{border-collapse:collapse;width:100%}th,td{padding:6px 8px;border-bottom:1p
 </main>
 <div id="toast" class="hide"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>window.onerror=function(m,s,l){var d=document.createElement("div");d.style.cssText="background:#c8372d;color:#fff;padding:10px;font:14px sans-serif";d.textContent="Erreur : "+m+" (ligne "+l+")";document.body.insertBefore(d,document.body.firstChild)}</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
 /* ====== CONFIG : coller ici les 2 valeurs Supabase (voir LISEZMOI.md). Vide = mode invité local ====== */
 const SUPA_URL='https://irinzzwyykkretlopmcf.supabase.co', SUPA_KEY='sb_publishable_zh8YcRw2SIALSKJ6dBdIRQ_2HltkafB';
 /* ================================================================================================= */
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-let lang=localStorage.lang||'fr'; const T=(f,e)=>lang==='fr'?f:e;
-const sb=(SUPA_URL&&window.supabase)?supabase.createClient(SUPA_URL,SUPA_KEY):null;
-let me=null,isAdmin=false,act=null,TR=[],P=null,diag=[],cur=0,timer=null,done=JSON.parse(localStorage.done||'{}');
+const ls={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+let lang=ls.get('lang')||'fr'; const T=(f,e)=>lang==='fr'?f:e;
+let sb=null;try{if(SUPA_URL&&window.supabase)sb=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'asm-enspy-auth'}})}catch(e){console.warn(e)}
+let me=null,isAdmin=false,act=null,TR=[],P=null,diag=[],cur=0,timer=null,done={};try{done=JSON.parse(ls.get('done')||'{}')}catch(e){}
+let tries={},lastm={},seen={};try{tries=JSON.parse(ls.get('tries')||'{}');lastm=JSON.parse(ls.get('lastm')||'{}');seen=JSON.parse(ls.get('seen')||'{}')}catch(e){}
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 const AR=['ADD','SUB','MPY','DIV'],BR=['BR','BGT','BGE','BLT','BLE','BEZ'];
 const SYN={MUL:'MPY',MULT:'MPY',MULTIPLY:'MPY',SUBTRACT:'SUB',SUBSTRACT:'SUB',DIVIDE:'DIV',PLUS:'ADD',MINUS:'SUB',MOV:'LOAD / STORE',MOVE:'LOAD / STORE',LDA:'LOAD',STA:'STORE',JMP:'BR',JUMP:'BR',GOTO:'BR',BRANCH:'BR',BEQ:'BEZ',BNE:'BGT / BLT',HALT:'STOP',END:'STOP',INPUT:'READ',IN:'READ',OUT:'WRITE',OUTPUT:'WRITE',CMP:'SUB'};
 const SAMPLE={3:'READ A\nREAD B\nADD A, B, X\nWRITE X',2:'READ A\nREAD B\nSUB X, X\nADD X, A\nADD X, B\nWRITE X',1:'READ A\nREAD B\nLOAD A\nADD B\nSTORE X\nWRITE X',0:'READ A\nREAD B\nPUSH A\nPUSH B\nADD\nPOP X\nWRITE X'};
@@ -144,6 +160,7 @@ Label      : L1: instruction     Comment : ; ...`);
 
 /* ---------- Analyse syntaxique (syntaxe du cours uniquement) ---------- */
 function parse(src,mode){
+ src=src.replace(/[‘’]/g,"'").replace(/[“”]/g,'"').replace(/\u00a0/g,' ');
  const ins=[],errs=[],labels={},vars=[];
  const need=+mode===3?3:+mode===2?2:+mode===1?1:0;
  const sig=[T('aucun opérande : (SL) Co (TL) → SL, POP','no operand: (SL) Co (TL) → SL, POP'),'OP  (AC ← AC Co OP)','OP1, OP2  (OP1 ← OP1 Co OP2)','OP1, OP2, OP3  (OP3 ← OP1 Co OP2)'][need];
@@ -207,7 +224,7 @@ function exec(P,mode,inp){
   else if(o==='STORE'){if(ac===null)bad(T('L\'accumulateur est vide : rien à STOCKer.','The accumulator is empty: nothing to STORE.'));v[a[0]]=ac;}
   else if(o==='PUSH')st.push(get(a[0]));
   else if(o==='POP'){if(!st.length)bad(T('POP sur une pile vide.','POP on an empty stack.'));v[a[0]]=st.pop();}
-  else if(o==='READ'){if(!q.length)bad(T('READ : plus de valeur dans le champ « Entrées ».','READ: no more values in the “Inputs” field.'));const x=q.shift();if(Number.isNaN(x))bad(T('Entrée non numérique.','Non-numeric input.'));v[a[0]]=x;}
+  else if(o==='READ'){if(!q.length)bad(T(`READ n°${P.ins.filter(x=>x.op==='READ').length>inp.length?inp.length+1:''} : il manque des valeurs. Votre programme contient ${P.ins.filter(x=>x.op==='READ').length} READ mais le champ « Entrées » n'a que ${inp.length} valeur(s). Ajoutez-en (séparées par des virgules, sans limite), ex : 4, 3, 10, 2.`,`Not enough input values: your program has ${P.ins.filter(x=>x.op==='READ').length} READ but the “Inputs” field has only ${inp.length} value(s). Add more (comma-separated, no limit), e.g. 4, 3, 10, 2.`));const x=q.shift();if(Number.isNaN(x))bad(T('Entrée non numérique.','Non-numeric input.'));v[a[0]]=x;}
   else if(o==='WRITE')out.push(String(get(a[0])));
   else if(o==='PRINT')out.push(a.map(x=>/^['‘"]/.test(x)?x.slice(1,-1).trim():String(get(x))).join(' '));
   else if(o==='STOP'){snap(L);break;}
@@ -238,14 +255,14 @@ function drawCode(k){
 }
 function setStep(k){
  cur=k;const s=TR[k],mode=+$('#mode').value;
- if(!s){$('#tanks').innerHTML='';$('#out').textContent='';$('#stepInfo').textContent='';return}
+ if(!s){$('#aux').innerHTML='';$('#tanks').innerHTML='';$('#out').textContent='';$('#stepInfo').textContent='';return}
  const p=TR[k-1]||s;drawCode(s.line);$('#pRange').value=k;
- let h=(P.vars||[]).map(x=>{const val=s.v[x],ch=p.v[x]!==val,neg=val<0;
-  return `<div class="tank ${ch?'ch':''}">${esc(x)}<div class="cup ${neg?'neg':''}"><i style="height:${val===undefined?0:Math.min(100,18+Math.abs(val)*3)}%"></i><span><u>${val===undefined?'':val}</u></span></div></div>`}).join('');
- if(mode===1)h+=`<div class="tank ${p.ac!==s.ac?'ch':''}">AC<div class="cup"><i style="height:${s.ac===null?0:Math.min(100,18+Math.abs(s.ac)*3)}%"></i><span><u>${s.ac===null?'':s.ac}</u></span></div></div>`;
- if(mode===0){const n=s.st.length;h+=`<div class="stwrap"><div class="stack">`+s.st.map((x,i)=>`<div class="cell">${x}${i===n-1?'<em>TL</em>':i===n-2?'<em>SL</em>':''}</div>`).reverse().join('')+`</div><div class="tank">${T('pile','stack')}</div></div>`}
- if(s.fl!==null)h+=`<div class="tank">${T('résultat','result')}<div class="mut">${s.fl}</div></div>`;
- $('#tanks').innerHTML=h;$('#out').textContent=s.out.join('\n');
+ let a2='';let h=(P.vars||[]).map(x=>{const val=s.v[x],ch=p.v[x]!==val,neg=val<0;
+  return `<div class="tank ${ch?'ch':''}">${esc(x)}<div class="cup ${neg?'neg':''}"><i style="height:${val===undefined?0:Math.min(100,18+Math.abs(val)*3)}%"></i><span class="${String(val).length>5?'sm':''}"><u>${val===undefined?'':val}</u></span></div></div>`}).join('');
+ if(mode===1)a2+=`<div class="tank ${p.ac!==s.ac?'ch':''}">AC<div class="cup"><i style="height:${s.ac===null?0:Math.min(100,18+Math.abs(s.ac)*3)}%"></i><span><u>${s.ac===null?'':s.ac}</u></span></div></div>`;
+ if(mode===0){const n=s.st.length;a2+=`<div class="stwrap"><div class="stack">`+s.st.map((x,i)=>`<div class="cell">${x}${i===n-1?'<em>TL</em>':i===n-2?'<em>SL</em>':''}</div>`).reverse().join('')+`</div><div class="tank">${T('pile','stack')}</div></div>`}
+ if(s.fl!==null)a2+=`<div class="tank">${T('résultat','result')}<div class="mut">${s.fl}</div></div>`;
+ $('#aux').innerHTML=a2;$('#tanks').innerHTML=h;$('#tanks').className='tanks'+((P.vars||[]).length>8?' dense':'');$('#out').textContent=s.out.join('\n');
  $('#stepInfo').textContent=T('Étape','Step')+` ${k}/${TR.length-1}`;
 }
 const stop=()=>{clearInterval(timer);timer=null;$('#pPlay').textContent='⏵'};
@@ -258,36 +275,241 @@ $('#bEdit').onclick=toEdit;code.onclick=toEdit;
 ed.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();document.execCommand('insertText',false,'    ')}});
 ed.addEventListener('paste',e=>{if(act){e.preventDefault();toast(T('Collage désactivé pendant un exercice : tapez votre code.','Pasting is disabled during an exercise: type your code.'))}});
 $('#mode').onchange=()=>{if(!act&&Object.values(SAMPLE).includes(ed.value)||!ed.value.trim())ed.value=SAMPLE[$('#mode').value];toEdit()};
+const OPS=m=>[...AR,...BR,'READ','WRITE','PRINT','STOP',...(m===1?['LOAD','STORE']:[]),...(m===0?['PUSH','POP']:[])];
+function sug(){
+ const box=$('#sug');box.innerHTML='';if(ed.classList.contains('hide'))return;
+ const pos=ed.selectionStart,txt=ed.value.slice(0,pos),m=txt.match(/[A-Za-z_]\w*$/);if(!m)return;
+ const w=m[0],before=txt.slice(0,pos-w.length).split('\n').pop().replace(/^\s*[A-Za-z]\w*\s*:/,''),mode=+$('#mode').value,pp=parse(ed.value,mode);
+ const isOp=!before.trim();
+ let list=isOp?OPS(mode):/^\s*(BR|BGT|BGE|BLT|BLE|BEZ)\b/i.test(before)?Object.keys(pp.labels):pp.vars;
+ list=list.filter(x=>x.toLowerCase().startsWith(w.toLowerCase())&&x!==w).slice(0,6);
+ list.forEach(x=>{const b=document.createElement('button');b.textContent=x;b.onmousedown=e=>e.preventDefault();
+  b.onclick=()=>{const sp=isOp&&x!=='STOP'&&!(mode===0&&AR.includes(x))?' ':'';ed.setRangeText(x+sp,pos-w.length,pos,'end');ed.focus();sug()};box.appendChild(b)});
+}
+['input','click','keyup'].forEach(ev=>ed.addEventListener(ev,sug));
+ed.addEventListener('blur',()=>setTimeout(()=>{$('#sug').innerHTML=''},250));
+let th=ls.get('th')||(window.matchMedia&&matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+const applyTh=()=>{document.documentElement.dataset.th=th;$('#thBtn').textContent=th==='dark'?'☀️':'🌙'};
+$('#thBtn').onclick=()=>{th=th==='dark'?'light':'dark';ls.set('th',th);applyTh()};
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.remove('hide');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.add('hide'),4500)}
 
 /* ---------- Exercices ---------- */
 const EX=[
-{id:'sum',xp:10,ti:['Somme de deux nombres','Sum of two numbers'],d:['Lire A puis B, calculer X = A + B et écrire X (WRITE X).','Read A then B, compute X = A + B and write X.'],t:[[4,3],[-5,8],[0,0],[10,25]],r:(a,b)=>[a+b]},
-{id:'formula',xp:25,ti:['Formule du cours : Z = A*B + C/D','Course formula: Z = A*B + C/D'],d:['Lire A, B, C, D (dans cet ordre), calculer Z = A*B + C/D (division entière), écrire Z. Exemple du cours p.14.','Read A, B, C, D (in that order), compute Z = A*B + C/D (integer division), write Z. Course example p.14.'],t:[[4,3,10,2],[5,5,9,3],[2,7,15,4],[3,3,8,2]],r:(a,b,c,d)=>[a*b+Math.trunc(c/d)]},
-{id:'squares',xp:15,ti:['Somme des carrés','Sum of squares'],d:['Lire A et B, écrire A*A + B*B.','Read A and B, write A*A + B*B.'],t:[[3,4],[5,12],[0,2],[-3,3]],r:(a,b)=>[a*a+b*b]},
-{id:'abs',xp:15,ti:['Valeur absolue','Absolute value'],d:['Lire A, écrire |A|. Utilisez un branchement (BLT, BGE…).','Read A, write |A|. Use a branch (BLT, BGE…).'],t:[[5],[-7],[0],[-1]],r:a=>[Math.abs(a)]},
-{id:'swap',xp:20,ti:['Permutation (TD1 ex.5)','Swap (TD1 ex.5)'],d:['Lire A et B ; permuter si nécessaire pour que A soit le plus grand et B le plus petit. Écrire A puis B.','Read A and B; swap if needed so A is the larger and B the smaller. Write A then B.'],t:[[5,3],[3,5],[7,7],[-2,4]],r:(a,b)=>[Math.max(a,b),Math.min(a,b)]},
-{id:'parity',xp:20,ti:['Parité (inspiré TD1 ex.3)','Parity (from TD1 ex.3)'],d:["Lire A. Afficher PRINT ('YES') si A est pair, sinon PRINT ('NOT').","Read A. PRINT ('YES') if A is even, otherwise PRINT ('NOT')."],t:[[28],[33],[0],[7]],r:a=>[a%2===0?'YES':'NOT']},
-{id:'pyth',xp:30,ti:['Triplet de Pythagore (TD1 ex.7)','Pythagorean triple (TD1 ex.7)'],d:["Lire A, B, C (déjà rangés a<b<c). PRINT ('YES') si A²+B²=C², sinon PRINT ('NOT').","Read A, B, C (already sorted a<b<c). PRINT ('YES') if A²+B²=C², else PRINT ('NOT')."],t:[[3,4,5],[5,12,13],[2,3,4],[6,8,10],[1,2,3]],r:(a,b,c)=>[a*a+b*b===c*c?'YES':'NOT']}];
+{id:'sum',xp:10,lv:1,ti:['Somme de deux nombres','Sum of two numbers'],d:['Lire A puis B, calculer X = A + B et écrire X (WRITE X).','Read A then B, compute X = A + B and write X.'],t:[[4,3],[-5,8],[0,0],[10,25]],r:(a,b)=>[a+b],
+ s:`READ A
+READ B
+ADD A,B,X
+WRITE X`,h:[`ADD A, B, X signifie X ← A + B (cours p.12). En 2 adresses on part de X = 0 : SUB X,X puis ADD X,A puis ADD X,B.`,`ADD A, B, X means X ← A + B (course p.12). With 2 addresses start from X = 0: SUB X,X, then ADD X,A, then ADD X,B.`]},
+{id:'formula',xp:25,lv:2,ti:['Formule du cours : Z = A*B + C/D','Course formula: Z = A*B + C/D'],d:[`Lire A, B, C, D (dans cet ordre), calculer Z = A*B + C/D (division entière), écrire Z. Exemple du cours p.14.`,`Read A, B, C, D (in that order), compute Z = A*B + C/D (integer division), write Z. Course example p.14.`],t:[[4,3,10,2],[5,5,9,3],[2,7,15,4],[3,3,8,2]],r:(a,b,c,d)=>[a*b+Math.trunc(c/d)],
+ s:`READ A
+READ B
+READ C
+READ D
+MPY A,B,T
+DIV C,D,U
+ADD T,U,Z
+WRITE Z`,o:{0:`READ A
+READ B
+READ C
+READ D
+PUSH A
+PUSH B
+MPY
+PUSH C
+PUSH D
+DIV
+ADD
+POP Z
+WRITE Z`},h:[`Décomposez : T = A*B, U = C/D, Z = T + U. En 0 adresse, empilez les opérandes dans l'ordre : (SL) Co (TL) → SL.`,`Split it: T = A*B, U = C/D, Z = T + U. With 0 addresses, push operands in order: (SL) Co (TL) → SL.`]},
+{id:'squares',xp:15,lv:1,ti:['Somme des carrés','Sum of squares'],d:['Lire A et B, écrire A*A + B*B.','Read A and B, write A*A + B*B.'],t:[[3,4],[5,12],[0,2],[-3,3]],r:(a,b)=>[a*a+b*b],
+ s:`READ A
+READ B
+MPY A,A,T
+MPY B,B,U
+ADD T,U,S
+WRITE S`,h:[`Deux produits (A*A et B*B) puis une somme.`,`Two products (A*A and B*B) then a sum.`]},
+{id:'abs',xp:15,lv:2,ti:['Valeur absolue','Absolute value'],d:['Lire A, écrire |A|. Utilisez un branchement (BLT, BGE…).','Read A, write |A|. Use a branch (BLT, BGE…).'],t:[[5],[-7],[0],[-1]],r:a=>[Math.abs(a)],
+ s:`READ A
+SUB Z,Z,Z
+ADD A,Z,T
+BGE FIN
+SUB Z,A,A
+FIN: WRITE A`,h:[`Pas de constante : Z = 0 s'obtient par SUB Z,Z,Z. ADD A,Z,T recopie A dans T et positionne le résultat que BGE teste. Si A < 0 : A ← 0 − A.`,`No constants: Z = 0 comes from SUB Z,Z,Z. ADD A,Z,T copies A into T and sets the result BGE tests. If A < 0: A ← 0 − A.`]},
+{id:'swap',xp:20,lv:2,ti:['Permutation (TD1 ex.5)','Swap (TD1 ex.5)'],d:['Lire A et B ; permuter si nécessaire pour que A soit le plus grand et B le plus petit. Écrire A puis B.','Read A and B; swap if needed so A is the larger and B the smaller. Write A then B.'],t:[[5,3],[3,5],[7,7],[-2,4]],r:(a,b)=>[Math.max(a,b),Math.min(a,b)],
+ s:`READ A
+READ B
+SUB A,B,T
+BGE FIN
+SUB Z,Z,Z
+ADD A,Z,T
+ADD B,Z,A
+ADD T,Z,B
+FIN: WRITE A
+WRITE B`,h:[`SUB A,B,T teste A − B. Si A ≥ B (BGE) rien à faire. Sinon permutation avec une variable tampon T : T ← A, A ← B, B ← T (copie = ADD avec Z = 0).`,`SUB A,B,T tests A − B. If A ≥ B (BGE) nothing to do. Otherwise swap through a buffer T: T ← A, A ← B, B ← T (copy = ADD with Z = 0).`]},
+{id:'parity',xp:25,lv:3,ti:['Parité (inspiré TD1 ex.3)','Parity (from TD1 ex.3)'],d:[`Lire A (A > 0). Afficher PRINT ('YES') si A est pair, sinon PRINT ('NOT').`,`Read A (A > 0). PRINT ('YES') if A is even, otherwise PRINT ('NOT').`],t:[[28],[33],[10],[7]],r:a=>[a%2===0?'YES':'NOT'],
+ s:`READ A
+DIV A,A,U
+ADD U,U,C
+DIV A,C,N
+MPY N,C,N
+SUB A,N,T
+BEZ L1
+PRINT ('NOT')
+BR FIN
+L1: PRINT ('YES')
+FIN: STOP`,h:[`U = A/A = 1, C = U+U = 2. N = A/2 (entier) puis N*2 : si N*2 = A, A est pair (BEZ).`,`U = A/A = 1, C = U+U = 2. N = A/2 (integer) then N*2: if N*2 = A, A is even (BEZ).`]},
+{id:'pyth',xp:30,lv:3,ti:['Triplet de Pythagore (TD1 ex.7)','Pythagorean triple (TD1 ex.7)'],d:[`Lire A, B, C (déjà rangés a<b<c). PRINT ('YES') si A²+B²=C², sinon PRINT ('NOT').`,`Read A, B, C (already sorted a<b<c). PRINT ('YES') if A²+B²=C², else PRINT ('NOT').`],t:[[3,4,5],[5,12,13],[2,3,4],[6,8,10],[1,2,3]],r:(a,b,c)=>[a*a+b*b===c*c?'YES':'NOT'],
+ s:`READ A
+READ B
+READ C
+MPY A,A,A
+MPY B,B,B
+MPY C,C,C
+ADD A,B,T
+SUB T,C,T
+BEZ L1
+PRINT ('NOT')
+BR FIN
+L1: PRINT ('YES')
+FIN: STOP`,h:[`Élevez chaque nombre au carré, additionnez A² + B², puis T − C² : si le résultat est nul (BEZ), c'est un triplet.`,`Square each number, add A² + B², then T − C²: if the result is zero (BEZ) it is a triple.`]},
+{id:'max3',xp:25,lv:2,ti:['Maximum de trois nombres','Maximum of three numbers'],d:['Lire A, B, C et écrire le plus grand.','Read A, B, C and write the largest.'],t:[[3,9,5],[9,3,5],[3,5,9],[5,5,5],[-2,-8,-5]],r:(a,b,c)=>[Math.max(a,b,c)],
+ s:`READ A
+READ B
+READ C
+SUB A,B,T
+BLT AB
+SUB A,C,T
+BLT WC
+WRITE A
+STOP
+AB: SUB B,C,T
+BLT WC
+WRITE B
+STOP
+WC: WRITE C`,h:[`Comparez par soustraction + branchement : A < B ? alors le max est B ou C ; sinon A ou C. Pensez à STOP après chaque WRITE pour ne pas « tomber » dans la suite.`,`Compare with subtraction + branch: A < B? then the max is B or C; otherwise A or C. Put STOP after each WRITE so execution does not fall through.`]},
+{id:'formula2',xp:25,lv:2,ti:['Formule : Z = (A+B)*(C-D)/E','Formula: Z = (A+B)*(C-D)/E'],d:['Lire A, B, C, D, E (E ≠ 0) et écrire Z = (A+B)*(C−D)/E (division entière).','Read A, B, C, D, E (E ≠ 0) and write Z = (A+B)*(C−D)/E (integer division).'],t:[[1,2,5,3,2],[4,6,9,2,5],[2,2,1,8,3],[7,1,6,6,4]],r:(a,b,c,d,e)=>[Math.trunc((a+b)*(c-d)/e)],
+ s:`READ A
+READ B
+READ C
+READ D
+READ E
+ADD A,B,T
+SUB C,D,U
+MPY T,U,T
+DIV T,E,Z
+WRITE Z`,o:{0:`READ A
+READ B
+READ C
+READ D
+READ E
+PUSH A
+PUSH B
+ADD
+PUSH C
+PUSH D
+SUB
+MPY
+PUSH E
+DIV
+POP Z
+WRITE Z`},h:[`Évaluez les parenthèses d'abord (T, U), multipliez, puis divisez. En pile : chaque opérateur travaille sur les deux derniers éléments empilés.`,`Evaluate the brackets first (T, U), multiply, then divide. On the stack each operator works on the last two pushed items.`]},
+{id:'countdown',xp:25,lv:2,ti:['Compte à rebours','Countdown'],d:[`Lire N (N ≥ 1) et écrire N, N−1, …, 1 (un WRITE par valeur). Algorithme : répéter { écrire N ; N ← N − 1 } tant que N > 0.`,`Read N (N ≥ 1) and write N, N−1, …, 1 (one WRITE per value). Algorithm: repeat { write N; N ← N − 1 } while N > 0.`],t:[[3],[1],[5]],r:n=>Array.from({length:n},(_,i)=>n-i),
+ s:`READ N
+DIV N,N,U
+L: WRITE N
+SUB N,U,N
+BGT L`,h:[`U = N/N = 1 sert de pas. La boucle : étiquette L, WRITE N, SUB N,U,N puis BGT L (on reboucle tant que le résultat est > 0).`,`U = N/N = 1 is the step. Loop: label L, WRITE N, SUB N,U,N then BGT L (loop while the result is > 0).`]},
+{id:'sumn',xp:30,lv:3,ti:['Somme 1 + 2 + … + N','Sum 1 + 2 + … + N'],d:[`Lire N (N ≥ 1), écrire S = 1+2+…+N. Algorithme : S ← 0 ; répéter { S ← S + N ; N ← N − 1 } tant que N > 0.`,`Read N (N ≥ 1), write S = 1+2+…+N. Algorithm: S ← 0; repeat { S ← S + N; N ← N − 1 } while N > 0.`],t:[[1],[5],[10],[40]],r:n=>[n*(n+1)/2],
+ s:`READ N
+DIV N,N,U
+SUB S,S,S
+L: ADD S,N,S
+SUB N,U,N
+BGT L
+WRITE S`,h:[`Initialisations : U = 1 (DIV N,N) et S = 0 (SUB S,S,S). Dans la boucle, le BGT doit suivre immédiatement le SUB N,U,N qui décrémente N.`,`Initializations: U = 1 (DIV N,N) and S = 0 (SUB S,S,S). Inside the loop, BGT must come right after the SUB N,U,N that decrements N.`]},
+{id:'mulrep',xp:30,lv:3,ban:'MPY',ti:['Produit par additions répétées','Product by repeated additions'],d:[`Calculer P = A × B (B ≥ 1) SANS utiliser MPY. Algorithme : P ← 0 ; répéter { P ← P + A ; B ← B − 1 } tant que B > 0. Lire A puis B, écrire P.`,`Compute P = A × B (B ≥ 1) WITHOUT MPY. Algorithm: P ← 0; repeat { P ← P + A; B ← B − 1 } while B > 0. Read A then B, write P.`],t:[[4,3],[7,1],[5,6],[-3,4]],r:(a,b)=>[a*b],
+ s:`READ A
+READ B
+DIV B,B,U
+SUB P,P,P
+L: ADD P,A,P
+SUB B,U,B
+BGT L
+WRITE P`,h:[`Calculez U = B/B = 1 AVANT de modifier B. Le compteur B décroît jusqu'à 0 ; à chaque tour on ajoute A à P.`,`Compute U = B/B = 1 BEFORE changing B. The counter B decreases to 0; each turn adds A to P.`]},
+{id:'fact',xp:35,lv:4,ti:['Factorielle N!','Factorial N!'],d:[`Lire N (N ≥ 1) et écrire N!. Algorithme : F ← 1 ; répéter { F ← F × N ; N ← N − 1 } tant que N > 0.`,`Read N (N ≥ 1) and write N!. Algorithm: F ← 1; repeat { F ← F × N; N ← N − 1 } while N > 0.`],t:[[1],[3],[5],[6]],r:n=>[[...Array(n).keys()].reduce((f,i)=>f*(i+1),1)],
+ s:`READ N
+DIV N,N,U
+DIV N,N,F
+L: MPY F,N,F
+SUB N,U,N
+BGT L
+WRITE F`,h:[`La constante 1 s'obtient par DIV N,N (N ≠ 0) : F ← 1 et U ← 1. Ensuite même schéma de boucle que la somme, avec MPY à la place de ADD.`,`The constant 1 comes from DIV N,N (N ≠ 0): F ← 1 and U ← 1. Then the same loop pattern as the sum, with MPY instead of ADD.`]},
+{id:'gcd',xp:40,lv:4,ti:['PGCD (Euclide par soustractions)','GCD (Euclid by subtraction)'],d:[`Lire A et B (> 0), écrire leur PGCD. Algorithme : tant que A ≠ B { si A > B alors A ← A − B sinon B ← B − A } ; écrire A.`,`Read A and B (> 0), write their GCD. Algorithm: while A ≠ B { if A > B then A ← A − B else B ← B − A }; write A.`],t:[[12,18],[17,5],[7,7],[48,36],[9,27]],r:(a,b)=>{while(a!==b){if(a>b)a-=b;else b-=a}return[a]},
+ s:`READ A
+READ B
+L: SUB A,B,T
+BEZ FIN
+BGT L1
+SUB B,A,B
+BR L
+L1: SUB A,B,A
+BR L
+FIN: WRITE A`,h:[`Un seul SUB A,B,T suffit : BEZ (égaux → fin) puis BGT (A > B) testent le même résultat, sans calcul entre les deux. BR L recommence la boucle.`,`A single SUB A,B,T is enough: BEZ (equal → end) then BGT (A > B) test the same result, with no computation in between. BR L restarts the loop.`]}
+];
+/* Traduit une solution écrite à 3 adresses vers 2/1/0 adresse (règles du cours p.12-13) */
+function trans(src,m,ov){
+ if(ov&&ov[m])return ov[m];
+ if(m===3)return src;
+ const out=[];
+ src.split('\n').forEach(l=>{
+  const x=l.match(/^(?:([A-Za-z]\w*):\s*)?(ADD|SUB|MPY|DIV)\s+(\w+),\s*(\w+),\s*(\w+)\s*$/);
+  if(!x){out.push(l);return}
+  const o=x[2],a=x[3],b=x[4],d=x[5];let s;
+  if(m===0)s=['PUSH '+a,'PUSH '+b,o,'POP '+d];
+  else if(m===1)s=['LOAD '+a,o+' '+b,'STORE '+d];
+  else if(d===a)s=[o+' '+a+', '+b];
+  else if(d===b&&(o==='ADD'||o==='MPY'))s=[o+' '+b+', '+a];
+  else if(d===b)s=['SUB TMP, TMP','ADD TMP, '+a,o+' TMP, '+b,'SUB '+d+', '+d,'ADD '+d+', TMP'];
+  else s=['SUB '+d+', '+d,'ADD '+d+', '+a,o+' '+d+', '+b];
+  if(x[1])s[0]=x[1]+': '+s[0];
+  out.push(...s);
+ });
+ return out.join('\n');
+}
 const xpOf=()=>EX.reduce((s,e)=>s+[0,1,2,3].filter(m=>done[e.id+':'+m]).length*e.xp,0);
 function drawEx(){
- $('#exList').innerHTML=`<div class="card"><b>XP : ${xpOf()}</b> · ${T('Niveau','Level')} ${Math.floor(xpOf()/50)+1}</div>`+EX.map(e=>`<div class="ex"><b>${esc(e.ti[lang==='fr'?0:1])}</b> <span class="badge">${e.xp} XP / mode</span><p>${esc(e.d[lang==='fr'?0:1])}</p><div class="row">`+
-  [3,2,1,0].map(m=>`<button data-ex="${e.id}" data-m="${m}">${done[e.id+':'+m]?'✔ ':''}${m} ${T('adr.','addr.')}</button>`).join('')+`</div></div>`).join('');
+ const L=lang==='fr'?0:1;
+ $('#exList').innerHTML=`<div class="card"><b>XP : ${xpOf()}</b> · ${T('Niveau','Level')} ${Math.floor(xpOf()/50)+1}</div>`+EX.map(e=>`<div class="ex"><b>${esc(e.ti[L])}</b> <span class="badge">${e.xp} XP / mode</span><span class="badge">${'★'.repeat(e.lv)}</span><p>${esc(e.d[L])}</p><div class="row">`+
+  [3,2,1,0].map(m=>`<button data-ex="${e.id}" data-m="${m}">${done[e.id+':'+m]?'✔ ':''}${m} ${T('adr.','addr.')}</button>`).join('')+`<button data-sol="${e.id}">💡 Solution</button></div><div id="sol-${e.id}"></div></div>`).join('');
  $$('[data-ex]').forEach(b=>b.onclick=()=>startEx(b.dataset.ex,+b.dataset.m));
+ $$('[data-sol]').forEach(b=>b.onclick=()=>showSol(b.dataset.sol));
+}
+function showSol(id,m){
+ const e=EX.find(x=>x.id===id),box=$('#sol-'+id),L=lang==='fr'?0:1;
+ if(!tries[id])return toast(T("Faites d'abord au moins un essai : ouvrez l'exercice, écrivez votre code, puis « Valider ».","Make at least one attempt first: open the exercise, write your code, then “Check”."));
+ if(m===undefined&&box.innerHTML){box.innerHTML='';return}
+ m=m===undefined?(lastm[id]!==undefined?lastm[id]:3):m;
+ seen[id+':'+m]=1;ls.set('seen',JSON.stringify(seen));
+ box.innerHTML=`<div class="card" style="margin-top:8px"><div class="row">`+[3,2,1,0].map(k=>`<button data-k="${k}" ${k===m?'class="pri"':''}>${k} ${T('adr.','addr.')}</button>`).join('')+`</div><pre class="sol">${esc(trans(e.s,m,e.o))}</pre><p>${esc(e.h[L])}</p><small class="mut">${T("Solution consultée : cet exercice ne rapporte plus d'XP dans ce mode.","Solution viewed: no more XP for this exercise in this mode.")}</small></div>`;
+ box.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>showSol(id,+b.dataset.k));
 }
 function startEx(id,m){
- act=EX.find(e=>e.id===id);act.m=m;$('#mode').value=m;ed.value='; '+act.ti[lang==='fr'?0:1]+'\n';
+ act=EX.find(e=>e.id===id);act.m=m;$('#mode').value=m;$('#inp').value=act.t[0].join(', ');ed.value='; '+act.ti[lang==='fr'?0:1]+'\n';
  $('#actBar').innerHTML=`<b>${esc(act.ti[lang==='fr'?0:1])}</b> — ${esc(act.d[lang==='fr'?0:1])} <button id="bQuit">✕</button>`;
  $('#actBar').classList.remove('hide');$('#bVal').classList.remove('hide');$('#bQuit').onclick=()=>{act=null;$('#actBar').classList.add('hide');$('#bVal').classList.add('hide')};
  tab('ed');toEdit();
 }
 $('#bVal').onclick=()=>{
  stop();run();const mode=+$('#mode').value;if(!act)return;
+ if(parse(ed.value,mode).ins.length){tries[act.id]=(tries[act.id]||0)+1;lastm[act.id]=mode;ls.set('tries',JSON.stringify(tries));ls.set('lastm',JSON.stringify(lastm))}
  if(diag.some(d=>!d.w))return toast(T('Corrigez d\'abord les erreurs signalées en rouge.','Fix the red errors first.'));
  const Pp=parse(ed.value,mode);let k=0;
+ if(act.ban&&Pp.ins.some(i=>i.op===act.ban))return toast(T(`Interdit dans cet exercice : ${act.ban}.`,`Not allowed in this exercise: ${act.ban}.`));
  for(const t of act.t){const r=exec(Pp,mode,t),exp=act.r(...t).map(String),got=r.err?null:r.tr[r.tr.length-1].out;k++;
   if(!got||got.join('|')!==exp.join('|'))return toast(T(`✘ Test ${k}/${act.t.length} raté — entrées : ${t.join(', ')} · attendu : ${exp.join(' ')} · obtenu : ${got?got.join(' ')||'(rien)':'erreur : '+r.err.msg}`,`✘ Test ${k}/${act.t.length} failed — inputs: ${t.join(', ')} · expected: ${exp.join(' ')} · got: ${got?got.join(' ')||'(nothing)':'error: '+r.err.msg}`));}
- const key=act.id+':'+mode,first=!done[key];done[key]=1;localStorage.done=JSON.stringify(done);
+ const key=act.id+':'+mode;
+ if(seen[key]&&!done[key])return toast(T('✔ Réponse correcte, mais la solution a été consultée : pas d\'XP pour ce mode.','✔ Correct, but you viewed the solution: no XP for this mode.'));
+ const first=!done[key];done[key]=1;ls.set('done',JSON.stringify(done));
  if(sb&&me)sb.rpc('complete_exercise',{p_ex:act.id,p_mode:mode});
  toast(first?T(`🎉 Réussi ! +${act.xp} XP`,`🎉 Passed! +${act.xp} XP`):T('✔ Réussi (déjà validé)','✔ Passed (already completed)'));
 };
@@ -301,16 +523,21 @@ async function auth(sign){
  if(!/^[A-Za-z0-9_]{3,20}$/.test(p))return toast(T('Pseudo invalide (3-20 lettres, chiffres ou _).','Invalid username (3–20 letters, digits or _).'));
  const r=sign?await sb.auth.signUp({email:mail(p),password:pw,options:{data:{pseudo:p}}}):await sb.auth.signInWithPassword({email:mail(p),password:pw});
  if(r.error)return toast(r.error.message.includes('already')?T('Ce pseudo existe déjà.','Username already taken.'):r.error.message.includes('Invalid login')?T('Pseudo ou mot de passe incorrect.','Wrong username or password.'):r.error.message);
- $('#auth').classList.add('hide');
+ ls.set('pseudo',p);$('#auth').classList.add('hide');
 }
-$('#bLogin').onclick=()=>auth(0);$('#bSign').onclick=()=>auth(1);
+$('#authForm').onsubmit=e=>{e.preventDefault();auth(0)};$('#bSign').onclick=()=>auth(1);
+$('#bLater').onclick=()=>{ls.set('later',Date.now());$('#auth').classList.add('hide')};
+$('#pseudo').value=ls.get('pseudo')||'';
+(function(){const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+ if(ios&&!navigator.standalone&&!ls.get('tipx'))$('#tip').classList.remove('hide');
+ $('#tipx').onclick=()=>{ls.set('tipx',1);$('#tip').classList.add('hide')}})();
 $('#authBtn').onclick=async()=>{if(me){await sb.auth.signOut()}else $('#auth').classList.toggle('hide')};
 async function onUser(u){
  me=u;isAdmin=false;
  if(u){const{data}=await sb.from('profiles').select('pseudo,is_admin').eq('id',u.id).single();
-  isAdmin=!!(data&&data.is_admin);$('#who').textContent=data?data.pseudo:'';log('login');
-  const pr=await sb.from('progress').select('ex_id,mode');(pr.data||[]).forEach(x=>done[x.ex_id+':'+x.mode]=1);localStorage.done=JSON.stringify(done)}
- else $('#who').textContent=T('Invité','Guest');
+  isAdmin=!!(data&&data.is_admin);$('#who').textContent=data?data.pseudo:'';if(Date.now()-(+ls.get('lastlog')||0)>432e5){log('login');ls.set('lastlog',Date.now())}
+  const pr=await sb.from('progress').select('ex_id,mode');(pr.data||[]).forEach(x=>done[x.ex_id+':'+x.mode]=1);ls.set('done',JSON.stringify(done))}
+ else{$('#who').textContent=T('Invité','Guest');if(sb&&Date.now()-(+ls.get('later')||0)>864e5)$('#auth').classList.remove('hide')}
  $('#authBtn').textContent=u?T('Déconnexion','Sign out'):T('Connexion','Sign in');$('#tabAd').classList.toggle('hide',!isAdmin);
 }
 async function drawRk(){
@@ -334,7 +561,7 @@ function applyLang(){document.documentElement.lang=lang;$$('[data-f]').forEach(n
  $('#cheat').textContent=CHEAT();$('#pseudo').placeholder=T('pseudo','username');$('#pass').placeholder=T('mot de passe','password');
  $('#authBtn').textContent=me?T('Déconnexion','Sign out'):T('Connexion','Sign in');if(!me)$('#who').textContent=T('Invité','Guest');
  $$('#mode option').forEach(o=>o.textContent=o.value+' '+T('adresse(s)','address(es)'))}
-$('#langBtn').onclick=()=>{lang=lang==='fr'?'en':'fr';localStorage.lang=lang;applyLang()};
-ed.value=SAMPLE[3];applyLang();
+$('#langBtn').onclick=()=>{lang=lang==='fr'?'en':'fr';ls.set('lang',lang);applyLang()};
+ed.value=SAMPLE[3];applyLang();applyTh();
 if(sb){sb.auth.onAuthStateChange((_e,s)=>onUser(s?s.user:null));}else{$('#authBtn').classList.add('hide')}
 </script></body></html>
