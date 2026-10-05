@@ -564,4 +564,5 @@ function applyLang(){document.documentElement.lang=lang;$$('[data-f]').forEach(n
 $('#langBtn').onclick=()=>{lang=lang==='fr'?'en':'fr';ls.set('lang',lang);applyLang()};
 ed.value=SAMPLE[3];applyLang();applyTh();
 if(sb){sb.auth.onAuthStateChange((_e,s)=>onUser(s?s.user:null));}else{$('#authBtn').classList.add('hide')}
+
 </script></body></html>
